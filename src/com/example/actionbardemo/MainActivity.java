@@ -55,7 +55,25 @@ public class MainActivity extends Activity {
 			}
 			
 		});
+		
+		gvResults.setOnScrollListener(new EndlessScrollListener() {
+		    @Override
+		    public void onLoadMore(int page, int totalItemsCount) {
+	                // Triggered only when new data needs to be appended to the list
+	                // Add whatever code is needed to append new items to your AdapterView
+		        customLoadMoreDataFromApi(page, totalItemsCount); 
+	                // or customLoadMoreDataFromApi(totalItemsCount); 
+		    }
+	        });
 	}
+	
+	  // Append more data into the adapter
+    public void customLoadMoreDataFromApi(int offset, int totalItemsCount) {
+      // This method probably sends out a network request and appends new data items to your adapter. 
+      // Use the offset value and add it as a parameter to your API request to retrieve paginated data.
+      // Deserialize API response and then construct new objects to append to the adapter
+    	searchQuery (offset, false);
+    }
 	
 	public void setupViews ()
 	{
@@ -70,9 +88,9 @@ public class MainActivity extends Activity {
 	        getMenuInflater().inflate(R.menu.menu_simple, menu);
 	        return true;
 	    }
-	 private String getURL ()
+	 private String getURL (int page)
 	 {
-		 String url = "https://ajax.googleapis.com/ajax/services/search/images?v=1.0&rsz=8";
+		 String url = "https://ajax.googleapis.com/ajax/services/search/images?v=1.0&rsz=8&start=" + page;
 
 		 if (settings.getColorFilter() != "")
 		 {
@@ -98,18 +116,19 @@ public class MainActivity extends Activity {
 		 return url;
 	 }
 	 
-	 public void searchQuery ()
+	 public void searchQuery (int page, final boolean clear)
 	 {
 		 String query = etQuery.getText().toString();
 		 if (query == "")
 		 {
 			 return;
 		 }
-//		 Toast.makeText(this, "Searching for " + query, Toast.LENGTH_SHORT).show();
+		// Toast.makeText(this, "Searching for " + query, Toast.LENGTH_SHORT).show();
 		 AsyncHttpClient client = new AsyncHttpClient ();
 		 //"https://ajax.googleapis.com/ajax/services/search/images?v=1.0&q=barack%20obama&userip=INSERT-USER-IP");
-		 String url = getURL() ;
-		 client.get(url + "&start="+ 0+ "&q=" + Uri.encode(query),
+		 String url = getURL(page) ;
+		 Log.d ("DEBUG", "url = " + url);
+		 client.get(url +  "&q=" + Uri.encode(query),
 				 new JsonHttpResponseHandler() {
 			 @Override
 			 public void onSuccess (JSONObject response)
@@ -120,7 +139,11 @@ public class MainActivity extends Activity {
 					 //Log.d ("DEBUG", "response data = " + response.toString(2));
 					 imageJsonResults = response.getJSONObject(
 							 "responseData").getJSONArray("results");
-					 imageResults.clear ();
+					 if (clear == true)
+					 {
+						 imageResults.clear ();	 
+					 }
+					 
 					 imageAdapter.addAll(ImageResult.fromJSONArray (imageJsonResults));
 					 //Log.d ("DEBUG", imageResults.toString ());
 				 }
@@ -135,7 +158,7 @@ public class MainActivity extends Activity {
 	 
 	 public void onImageSearch (View view)
 	 {
-		 searchQuery ();
+		 searchQuery (0, true);
 	 }
 	 
 	
@@ -159,7 +182,7 @@ public class MainActivity extends Activity {
 			 {
 				 settings = (Settings)data.getSerializableExtra("value");
 				 Toast.makeText(this, settings.getImageSize(), Toast.LENGTH_SHORT);
-				 searchQuery();
+				 searchQuery(0, true);
 			 }
 		 }
 	}

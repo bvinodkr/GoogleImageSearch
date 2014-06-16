@@ -17,6 +17,17 @@ public class SecondActivity extends Activity {
 	Spinner typeOptions;
 	
 	Settings settings;
+	
+	private int getIndex (String item, ArrayAdapter<CharSequence> adapter)
+	{
+		for(int i=0; i < adapter.getCount(); i++) {
+			  if(item.trim().equals(adapter.getItem(i).toString())){
+				  return i;
+			  }
+		}
+		return 0;
+	}
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -31,6 +42,7 @@ public class SecondActivity extends Activity {
 		sizeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		// Apply the adapter to the spinner
 		sizeOptions.setAdapter(sizeAdapter);
+		sizeOptions.setSelection(getIndex (settings.getImageSize(), sizeAdapter));
 		sizeOptions.setOnItemSelectedListener(new OnItemSelectedListener() {
 
 			@Override
@@ -50,6 +62,7 @@ public class SecondActivity extends Activity {
 		});
 	
 	   colorOptions= (Spinner) findViewById(R.id.colorOptions);
+	   
 	   colorOptions.setOnItemSelectedListener(new OnItemSelectedListener() {
 
 		@Override
@@ -71,6 +84,8 @@ public class SecondActivity extends Activity {
 		        R.array.color_filter, android.R.layout.simple_spinner_item);
 		// Specify the layout to use when the list of choices appears
 		colorAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		   colorOptions.setSelection(getIndex (settings.getColorFilter(), colorAdapter));
+
 		// Apply the adapter to the spinner
 		colorOptions.setAdapter(colorAdapter);
 		
@@ -99,8 +114,11 @@ public class SecondActivity extends Activity {
 		        R.array.image_type, android.R.layout.simple_spinner_item);
 		// Specify the layout to use when the list of choices appears
 		typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
 		// Apply the adapter to the spinner
 		typeOptions.setAdapter(typeAdapter);
+		typeOptions.setSelection(getIndex (settings.getImageType(), typeAdapter));
+
 	}
 	
 	public void onSubmit (View v)
